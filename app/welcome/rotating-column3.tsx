@@ -1,14 +1,13 @@
 import React, { useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { OrbitControls } from '@react-three/drei'
 
-// A single cube that orbits around the horizontal (X) axis
-function MovingCube({ x, initialAngle, radius, speed, color, rotation, blockSize }) {
+// Single cube component that orbits around the x-axis.
+function MovingCube({ x, initialAngle, radius, speed, color, blockSize }) {
     const meshRef = useRef()
     const angleRef = useRef(initialAngle)
 
-    // Update the cube's position on each frame without altering its own rotation.
+    // Update the cube's position each frame, orbiting around the x-axis.
     useFrame((state, delta) => {
         angleRef.current += speed * delta
         const y = radius * Math.cos(angleRef.current)
@@ -19,18 +18,18 @@ function MovingCube({ x, initialAngle, radius, speed, color, rotation, blockSize
     })
 
     return (
-        <mesh ref={meshRef} rotation={rotation}>
+        <mesh ref={meshRef} rotation={[0, 0, 0]}>
             <boxGeometry args={[blockSize, blockSize, blockSize]} />
             <meshStandardMaterial color={color} />
         </mesh>
     )
 }
 
-function TornadoColumn({ cubeCount = 120 }) {
+function TornadoColumn({ cubeCount = 100 }) {
     const cubes = []
-    const blockSize = 0.15
+    const blockSize = 0.2
 
-    // Simple helper for random values
+    // Helper to return a uniform random value.
     const randBetween = (min, max) => Math.random() * (max - min) + min
 
     // Generate an x coordinate biased toward 0.
@@ -41,26 +40,17 @@ function TornadoColumn({ cubeCount = 120 }) {
         return sign * (Math.random() ** 2) * 5
     }
 
-
-    // Define minimum and maximum radii for the cubes
-    const minRadius = 1
+    // Define the radial range in the yz-plane.
+    const minRadius = 0.5
     const maxRadius = 2
+
     for (let i = 0; i < cubeCount; i++) {
-        // X position along the horizontal pipe/column
-       // const x = randBetween(-4, 4)
         const x = biasedX()
-        // Biased random radius using a squared random to cluster near the centre:
-        //const radius = minRadius + (maxRadius - minRadius) * Math.pow(Math.random(), 2)
-        // Distance from the central X-axis (affects orbit radius)
-        const radius = randBetween(1.5, 2)
-        // Random starting angle
+        const radius = randBetween(minRadius, maxRadius)
         const initialAngle = Math.random() * 2 * Math.PI
-        // Orbit speed proportional to radius (further cubes move faster)
-        const speed = 1 //radius; //2;
-        // Colour for the cube (random hue)
+        // Rotation speed is directly proportional to the orbit radius.
+        const speed = radius * 1.5
         const color = new THREE.Color(`hsl(${Math.random() * 360}, 100%, 50%)`)
-        // Fixed rotation so cubes don't rotate themselves
-        const rotation = [0, 0, 0]
 
         cubes.push(
             <MovingCube
@@ -70,7 +60,6 @@ function TornadoColumn({ cubeCount = 120 }) {
                 radius={radius}
                 speed={speed}
                 color={color}
-                rotation={rotation}
                 blockSize={blockSize}
             />
         )
@@ -84,8 +73,7 @@ export default function App() {
         <Canvas style={{ width: '100vw', height: '100vh' }}>
             <ambientLight intensity={0.4} />
             <pointLight position={[10, 10, 10]} />
-            <TornadoColumn cubeCount={2000} />
-            <OrbitControls />
+            <TornadoColumn cubeCount={120} />
         </Canvas>
     )
 }

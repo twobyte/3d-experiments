@@ -1,6 +1,6 @@
 import type { Route } from "./+types/home";
 //import { Welcome } from "../welcome/welcome";
-import App from "../welcome/rotating-column2";
+import App from "../welcome/rotating-column1";
 
 export function meta({}: Route.MetaArgs) {
   return [
